@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Owner\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,5 +20,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('owner')->group(function () {
-    Route::post('register', []);
+    Route::post('register', [AuthController::class, 'register'])->name('owner.register');
 });

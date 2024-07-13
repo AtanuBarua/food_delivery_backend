@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -17,10 +18,18 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+    const USERTYPE_ADMIN = 1;
+    const USERTYPE_OWNER = 2;
+    const USERTYPE_CUSTOMER = 3;
+    const USERTYPE_RIDER = 4;
+
     protected $fillable = [
         'name',
         'email',
         'password',
+        'phone',
+        'status',
+        'user_type'
     ];
 
     /**
@@ -42,4 +51,19 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
+
+    public function createOwner($request) {
+        $data = $this->prepareOwnerCreateData($request);
+        return self::create($data);
+    }
+
+    private function prepareOwnerCreateData($request) {
+        $data['name'] = $request['name'];
+        $data['email'] = $request['email'];
+        $data['password'] = Hash::make($request['password']);
+        $data['user_type'] = self::USERTYPE_OWNER;
+        $data['phone'] = $request['phone'];
+        $data['status'] = 0;
+        return $data;
+    }
 }
