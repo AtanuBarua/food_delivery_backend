@@ -58,6 +58,19 @@ class AuthController extends Controller
                 'message' =>'Something went wrong'
             ]);
         }
+    }
 
+    public function logout(Request $request) {
+        try {
+            Auth::logout();
+            $request->session()->invalidate();
+            return response()->json([
+                'message' => 'Logged out successfully'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'message' => 'Something went wrong'
+            ]);
+        }
     }
 }

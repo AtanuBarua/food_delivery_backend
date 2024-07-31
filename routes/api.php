@@ -22,4 +22,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::prefix('owner')->group(function () {
     Route::post('register', [AuthController::class, 'register'])->name('owner.register');
     Route::post('login', [AuthController::class, 'login'])->name('owner.login');
+
+    Route::middleware('auth:sanctum')->group(function() {
+        Route::post('logout', [AuthController::class, 'logout'])->name('owner.logout');
+    });
 });
