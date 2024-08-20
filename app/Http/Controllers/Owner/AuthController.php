@@ -17,16 +17,26 @@ class AuthController extends Controller
             'password' => 'required|min:6',
         ]);
 
-        try {
-            $user = (new User())->createOwner($request->all());
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
-        return response()->json([
-            'message'=>'Owner created successfully',
-            'user' => $user
-        ]);
+        $data = [];
+        $status_code = 500;
+        $status_message = 'Something went wrong';
 
+        try {
+            $data['user'] = (new User())->createOwner($request->all());
+
+            if (!empty($data['user'])){
+                $data['token'] = $data['user']->createToken('auth_token')->plainTextToken;
+                $status_message = "Owner created successfully";
+                $status_code = 200;
+            }
+        } catch (\Throwable $th) {
+            \Log::error("message", [$th->getMessage()]);
+        }
+
+        return response()->json([
+            'message' => $status_message,
+            'data' => $data
+        ], $status_code);
     }
 
     public function login(Request $request) {
@@ -35,42 +45,42 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
-        $status_code = 401;
-
         try {
+            $data = [];
+            $status_code = 500;
+            $status_message = 'Something went wrong';
+
             if (Auth::attempt($credentials)) {
-                $status_code = 200;
-                $request->session()->regenerate();
-                $user = User::where('email', $request->email)->first();
-                return response()->json([
-                    'status_code' => $status_code,
-                    'message' => 'Logged in successfully',
-                    'user' => $user
-                ]);
+                $data['user'] = User::where('email', $request->email)->first();
+                $data['token'] = $data['user']->createToken('auth_token')->plainTextToken;
+                $status_message = 'Logged in successfully';
+            } else {
+                $status_message = 'Incorrect email or password';
             }
-            return response()->json([
-                'status_code' => $status_code,
-                'message' => 'Incorrect email or password'
-            ]);
+
         } catch (\Throwable $th) {
-            return response()->json([
-                'status_code' => 500,
-                'message' =>'Something went wrong'
-            ]);
+            \Log::error("message", [$th->getMessage()]);
         }
+
+        return response()->json([
+            'message' => $status_message,
+            'data' => $data
+        ], $status_code);
     }
 
     public function logout(Request $request) {
+        $status_code = 500;
+        $status_message = 'Something went wrong';
+
         try {
-            Auth::logout();
-            $request->session()->invalidate();
-            return response()->json([
-                'message' => 'Logged out successfully'
-            ]);
+            $request->user()->tokens()->delete();
+                $status_message = 'Logged out successfully';
         } catch (\Throwable $th) {
-            return response()->json([
-                'message' => 'Something went wrong'
-            ]);
+            \Log::warning("message",[$th->getMessage()]);
         }
+
+        return response()->json([
+            'message' => $status_message
+        ], $status_code);
     }
 }
