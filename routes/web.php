@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Web\Owner\AuthController;
+use App\Http\Controllers\Api\Owner\RestaurantController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,4 +16,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::prefix('owner')->group(function () {
+    Route::post('register', [AuthController::class, 'register'])->name('owner.register');
+    Route::post('login', [AuthController::class, 'login'])->name('owner.login');
+
+    Route::middleware('auth')->group(function () {
+        Route::post('restaurant/add', [RestaurantController::class, 'addRestaurant'])->name('restaurant.store');
+        Route::post('logout', [AuthController::class, 'logout'])->name('owner.logout');
+    });
 });
