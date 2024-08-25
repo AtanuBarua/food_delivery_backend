@@ -24,46 +24,46 @@ class Restaurant extends Model
 
     public function prepareStoreData($request)
     {
-        try {
-            if (!empty($request['logo'])) {
-                $logoPath = $request['logo']->store('owner');
-            }
-
-            if (!empty($request['business_licence'])) {
-                $businessLicencePath = $request['business_licence']->store('owner');
-            }
-
-            if (!empty($request['vat_certificate'])) {
-                $vatCertificatePath = $request['vat_certificate']->store('owner');
-            }
-
-            if (!empty($request['bank_statement'])) {
-                $bankStatementPath = $request['bank_statement']->store('owner');
-            }
-
-            if (!empty($request['utility_bill'])) {
-                $utilityBillPath = $request['utility_bill']->store('owner');
-            }
-
-            if (!empty($request['restaurant_menu'])) {
-                $restaurantMenuPath = $request['restaurant_menu']->store('owner');
-            }
-
-            $data = [];
-            $data['name'] = $request['name'];
-            $data['logo'] = $logoPath;
-            $data['address'] = $request['address'];
-            $data['owner_id'] = auth()->id();
-            $data['business_licence'] = $businessLicencePath;
-            $data['vat_certificate'] = $vatCertificatePath;
-            $data['tax_identification_number'] = $request['tax_identification_number'];
-            $data['bank_statement'] = $bankStatementPath;
-            $data['utility_bill'] = $utilityBillPath;
-            $data['restaurant_menu'] = $restaurantMenuPath;
-        } catch (\Throwable $th) {
-            \Log::error("message", [$th->getMessage()]);
+        if (!empty($request['logo'])) {
+            $logoPath = $request['logo']->store('owner');
         }
 
+        if (!empty($request['business_licence'])) {
+            $businessLicencePath = $request['business_licence']->store('owner');
+        }
+
+        if (!empty($request['vat_certificate'])) {
+            $vatCertificatePath = $request['vat_certificate']->store('owner');
+        }
+
+        if (!empty($request['bank_statement'])) {
+            $bankStatementPath = $request['bank_statement']->store('owner');
+        }
+
+        if (!empty($request['utility_bill'])) {
+            $utilityBillPath = $request['utility_bill']->store('owner');
+        }
+
+        if (!empty($request['restaurant_menu'])) {
+            $restaurantMenuPath = $request['restaurant_menu']->store('owner');
+        }
+
+        $data = [];
+        $data['name'] = $request['name'];
+        $data['logo'] = $logoPath;
+        $data['address'] = $request['address'];
+        $data['owner_id'] = auth()->id();
+        $data['business_licence'] = $businessLicencePath;
+        $data['vat_certificate'] = $vatCertificatePath;
+        $data['tax_identification_number'] = $request['tax_identification_number'];
+        $data['bank_statement'] = $bankStatementPath;
+        $data['utility_bill'] = $utilityBillPath;
+        $data['restaurant_menu'] = $restaurantMenuPath;
+
         return $data;
+    }
+
+    public function getRestaurantsByOwnerId($owner_id) {
+        return self::query()->where('owner_id', $owner_id)->get();
     }
 }
