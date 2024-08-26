@@ -66,4 +66,8 @@ class Restaurant extends Model
     public function getRestaurantsByOwnerId($owner_id) {
         return self::query()->where('owner_id', $owner_id)->get();
     }
+
+    public function findRestaurantById($id) {
+        return self::find($id);
+    }
 }
