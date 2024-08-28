@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Owner;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\CreateRestaurantRequest;
+use App\Http\Requests\RestaurantRequest;
 use App\Http\Resources\RestaurantCollection;
 use App\Http\Resources\RestaurantResource;
 use App\Models\Restaurant;
@@ -12,13 +12,14 @@ use Illuminate\Support\Facades\Storage;
 
 class RestaurantController extends Controller
 {
-    public function addRestaurant(CreateRestaurantRequest $request)
+    public function addRestaurant(RestaurantRequest $request)
     {
         $status_code = 500;
         $status_message = 'Something went wrong';
 
         try {
-            $status = (new Restaurant())->store($request->all());
+            $data = $request->validated();
+            $status = (new Restaurant())->store($data);
             if ($status) {
                 $status_code = 200;
                 $status_message = 'Restaurant created successfully';
@@ -54,13 +55,14 @@ class RestaurantController extends Controller
     }
 
     public function restaurantDetails($id) {
-        $data = [];
+        $data['status'] = false;
         $status_code = 200;
 
         try {
             $restaurant = (new Restaurant())->findRestaurantById($id);
             if (!empty($restaurant)) {
                 $data['restaurant'] = new RestaurantResource($restaurant);
+                $data['status'] = true;
             }
             $this->authorize('view', $restaurant);
             $data['status_message'] = !empty($data['restaurant']) ? 'Successful' : 'Not found';
@@ -72,6 +74,28 @@ class RestaurantController extends Controller
 
         return response()->json([
             'data' => $data,
+        ], $status_code);
+    }
+
+    public function updateRestaurant(RestaurantRequest $request, $id) {
+        $status_code = 500;
+        $status_message = 'Something went wrong';
+
+        try {
+            $data = $request->validated();
+            $restaurant = new Restaurant();
+            $restaurantObj = $restaurant->findRestaurantById($id);
+            $status = $restaurant->updateRestaurant($data, $restaurantObj);
+            if ($status) {
+                $status_code = 200;
+                $status_message = 'Updated successfully';
+            }
+        } catch (\Throwable $th) {
+            \Log::error("message", [$th->getMessage()]);
+        }
+
+        return response()->json([
+            'message' => $status_message
         ], $status_code);
     }
 }

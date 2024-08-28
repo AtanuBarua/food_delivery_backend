@@ -28,6 +28,7 @@ Route::prefix('owner')->group(function () {
         Route::post('restaurant/add', [RestaurantController::class, 'addRestaurant'])->name('restaurant.store');
         Route::get('restaurants', [RestaurantController::class, 'getRestaurants'])->name('restaurant.fetch');
         Route::get('restaurant/{id}', [RestaurantController::class, 'restaurantDetails'])->name('restaurant.details');
+        Route::post('restaurant/update/{id}', [RestaurantController::class, 'updateRestaurant'])->name('restaurant.update');
         Route::post('logout', [AuthController::class, 'logout'])->name('owner.logout');
     });
 });
