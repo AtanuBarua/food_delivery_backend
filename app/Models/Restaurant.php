@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Cache\Store;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Restaurant extends Model
 {
@@ -25,42 +27,79 @@ class Restaurant extends Model
     public function prepareStoreData($request)
     {
         if (!empty($request['logo'])) {
-            $logoPath = $request['logo']->store('owner');
+            $request['logo'] = $request['logo']->store('owner');
         }
 
         if (!empty($request['business_licence'])) {
-            $businessLicencePath = $request['business_licence']->store('owner');
+            $request['business_licence'] = $request['business_licence']->store('owner');
         }
 
         if (!empty($request['vat_certificate'])) {
-            $vatCertificatePath = $request['vat_certificate']->store('owner');
+            $request['vat_certificate'] = $request['vat_certificate']->store('owner');
         }
 
         if (!empty($request['bank_statement'])) {
-            $bankStatementPath = $request['bank_statement']->store('owner');
+            $request['bank_statement'] = $request['bank_statement']->store('owner');
         }
 
         if (!empty($request['utility_bill'])) {
-            $utilityBillPath = $request['utility_bill']->store('owner');
+            $request['utility_bill'] = $request['utility_bill']->store('owner');
         }
 
         if (!empty($request['restaurant_menu'])) {
-            $restaurantMenuPath = $request['restaurant_menu']->store('owner');
+            $request['restaurant_menu'] = $request['restaurant_menu']->store('owner');
         }
 
-        $data = [];
-        $data['name'] = $request['name'];
-        $data['logo'] = $logoPath;
-        $data['address'] = $request['address'];
-        $data['owner_id'] = auth()->id();
-        $data['business_licence'] = $businessLicencePath;
-        $data['vat_certificate'] = $vatCertificatePath;
-        $data['tax_identification_number'] = $request['tax_identification_number'];
-        $data['bank_statement'] = $bankStatementPath;
-        $data['utility_bill'] = $utilityBillPath;
-        $data['restaurant_menu'] = $restaurantMenuPath;
+        $request['owner_id'] = auth()->id();
 
-        return $data;
+        return $request;
+    }
+
+    private function prepareUpdateData($request, $restaurant) {
+        if (!empty($request['logo'])) {
+            if (!empty($restaurant->logo)) {
+                Storage::delete($restaurant->logo);
+            }
+            $request['logo'] = $request['logo']->store('owner');
+        }
+
+        if (!empty($request['business_licence'])) {
+            if (!empty($restaurant->business_licence)) {
+                Storage::delete($restaurant->business_licence);
+            }
+            $request['business_licence'] = $request['business_licence']->store('owner');
+        }
+
+        if (!empty($request['vat_certificate'])) {
+            if (!empty($restaurant->vat_certificate)) {
+                Storage::delete($restaurant->vat_certificate);
+            }
+            $request['vat_certificate'] = $request['vat_certificate']->store('owner');
+        }
+
+        if (!empty($request['bank_statement'])) {
+            if (!empty($restaurant->bank_statement)) {
+                Storage::delete($restaurant->bank_statement);
+            }
+
+            $request['bank_statement'] = $request['bank_statement']->store('owner');
+        }
+
+        if (!empty($request['utility_bill'])) {
+            if (!empty($restaurant->utility_bill)) {
+                Storage::delete($restaurant->utility_bill);
+            }
+            $request['utility_bill'] = $request['utility_bill']->store('owner');
+        }
+
+        if (!empty($request['restaurant_menu'])) {
+            if (!empty($restaurant->restaurant_menu)) {
+                Storage::delete($restaurant->restaurant_menu);
+            }
+            $request['restaurant_menu'] = $request['restaurant_menu']->store('owner');
+        }
+        
+        return $request;
     }
 
     public function getRestaurantsByOwnerId($owner_id) {
@@ -69,5 +108,10 @@ class Restaurant extends Model
 
     public function findRestaurantById($id) {
         return self::find($id);
+    }
+
+    public function updateRestaurant($request, $restaurantObj) {
+        $data = $this->prepareUpdateData($request, $restaurantObj);
+        return $restaurantObj->update($data);
     }
 }
